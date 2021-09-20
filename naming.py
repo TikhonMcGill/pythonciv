@@ -4,11 +4,11 @@ vowels = ['a','e','i','o','u']
 consonants = ['b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','y','z','sh','ch','ph','zh','gh']
 normal_consonants = ['b','c','d','f','g','h','k','l','m','n','p','r','s','t','v','y']
 doublable = ["e","c","l","p","o","s","r","z"]
-government_titles = ["Republic","Kingdom","Empire","State","Federation","Confederation","Union","Tribe","Duchy","Imperium","Senate","Congress","Diarchy","Monarchy","Tetrarchy","Confederacy","House","Dynasty"]
-government_adjectives = ["Serene","Great","Grand","Everlasting","Eternal","United","Unified","Federated","Confederal","People's","National","Nationalist","Socialist","Communist","Holy","Plurinational"]
+government_titles = ["Nation","Clan","Horde","Republic","Kingdom","Empire","State","Federation","Confederation","Union","Tribe","Duchy","Imperium","Senate","Congress","Diarchy","Monarchy","Tetrarchy","Confederacy","House","Dynasty"]
+government_adjectives = ["Union","Combined","Serene","Great","Grand","Everlasting","Eternal","United","Unified","Federated","Confederal","People's","National","Nationalist","Socialist","Communist","Holy","Plurinational"]
 
-leadership_titles = ["President","King","Emperor","Administrator","Consul","Executive","Secretary","Chieftain","Duke","Imperator","Minister","Manager","Monarch","Leader","Commander","Father"]
-leadership_modifiers = ["Grand *","Serene *","*-in-Chief","Vice-*","Arch-*","Chief *","Immortal *","Eternal *","Great *","People's *","General *","Executive *","* Regnant","Perpetual *","Holy *","Revered *","Prime *"]
+leadership_titles = ["Master","Ruler","Khan","President","King","Emperor","Administrator","Consul","Executive","Secretary","Chieftain","Duke","Imperator","Minister","Manager","Monarch","Leader","Commander","Father"]
+leadership_modifiers = ["Grand *","Serene *","*-in-Chief","Vice-*","Arch-*","Chief *","Immortal *","Eternal *","Great *","People's *","General *","Executive *","* Regnant","Perpetual *","Holy *","Revered *","Prime *","First *"]
 
 def generate_gibberish():
     #Generates a gibberish word by alternating between a vowel and consonant
