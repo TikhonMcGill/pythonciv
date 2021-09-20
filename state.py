@@ -163,8 +163,8 @@ class State:
             commands.append("help")
         else:
             if self.money>=1000000:
-                command = "build firm"
-            elif self.money>=10000:
                 command = "build business"
+            elif self.money>=10000:
+                command = "build firm"
             else:
                 command = random.choice(commands)
