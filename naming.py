@@ -1,7 +1,8 @@
 import random
 
 vowels = ['a','e','i','o','u']
-consonants = ['b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','y','z','sh','ch','ph']
+consonants = ['b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','y','z','sh','ch','ph','zh','gh']
+normal_consonants = ['b','c','d','f','g','h','k','l','m','n','p','r','s','t','v','y']
 doublable = ["e","c","l","p","o","s","r","z"]
 government_titles = ["Republic","Kingdom","Empire","State","Federation","Confederation","Union","Tribe","Duchy","Imperium","Senate","Congress","Diarchy","Monarchy","Tetrarchy","Confederacy","House","Dynasty"]
 government_adjectives = ["Serene","Great","Grand","Everlasting","Eternal","United","Unified","Federated","Confederal","People's","National","Nationalist","Socialist","Communist","Holy","Plurinational"]
@@ -21,6 +22,11 @@ def generate_gibberish():
             result+=random.choice(consonants)
         is_vowel = not is_vowel
     return result
+
+def generate_palindrome():
+    #Generates a palindrome(a word that is unchanged if reversed)
+    pal = random.choice(normal_consonants)+random.choice(normal_consonants)
+    return pal+random.choice(vowels)+pal[::-1]
 
 def combine_fluently(part1,part2):
     #Combines two words fluently
