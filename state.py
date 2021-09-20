@@ -159,7 +159,8 @@ class State:
         if len(researchables)>0 or self.state==0:
             commands.append("research")
         if self.state==0:
-            pass
+            commands.append("info")
+            commands.append("help")
         else:
             if self.money>=1000000:
                 command = "build firm"
