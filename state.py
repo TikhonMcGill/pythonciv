@@ -3,7 +3,7 @@ import math
 
 class State:
     def __init__(self):
-        self.controller = 1 #The "controller" of the nation - 0 = player, 1 = AI
+        self.controller = 1 #The "controller" of the nation - 0 = player, 1 = AI, 2 = The Nation is "Dead" and ready to be deleted from the Game on the next turn
         self.population = 100 #The population of the nation
         self.manpower = 0 #The "manpower" of the nation - the military-capable population, because you can't have a civilization game without war!
         self.food = 1000 #The amount of food the nation has stored
@@ -66,20 +66,104 @@ class State:
         print("We have lots of "+self.demonym+" "+pluralize(self.currency)+" in our coffers!")
 
     def iterate_values(self):
-        population_growth = math.ceiltoint(self.population * 1.01)
-        manpower_growth = math.floortoint(math.sqrt(population_growth))
-        population_growth -= manpower_growth
+        if self.population<=0:
+            self.game_over()
+        else:
+            population_growth = math.ceiltoint(self.population * 1.01)
+            manpower_growth = math.floortoint(math.sqrt(population_growth))
+            population_growth -= manpower_growth
 
-        if self.food<=0:
-            self.food = 0
-            population_growth = 0
-            manpower_growth = 0
+            if self.food<=0:
+                self.food = 0
+                population_growth = 0
+                manpower_growth = 0
 
-        self.population += population_growth
-        self.manpower += manpower_growth
+            self.population += population_growth
+            self.manpower += manpower_growth
 
-        self.food+=int(self.farms * 10 * (1+ 0.01 * food_research))
-        self.money+=int(self.banks * 100 * (1 + 0.01*money_research))
-        self.farms += mathf.ceiltoint(self.firms/2)
-        self.banks += mathf.floortoint(self.firms/2)
-        self.firms += self.businesses
+            self.food+=int(self.farms * 10 * (1+ 0.01 * food_research))
+            self.money+=int(self.banks * 100 * (1 + 0.01*money_research))
+            self.farms += mathf.ceiltoint(self.firms/2)
+            self.banks += mathf.floortoint(self.firms/2)
+            self.firms += self.businesses
+
+    def get_food_research_cost():
+        cost = 1.5 ** self.food_research
+        cost = cost * 100
+        cost = int(cost)
+        return cost
+
+    def get_money_research_cost():
+        cost = 1.75 ** self.money_research
+        cost = cost * 100
+        cost = int(cost)
+        return cost
+
+    def state_print(self,text):
+        if self.state==0:
+            print(text)
+
+    def get_currency(self):
+        return self.demonym+" "+pluralize(self.currency)
+
+    def build_building(building):
+        building = building.lower()
+        if building=="farm":
+            if self.money>=1000:
+                self.money -= 1000
+                self.state_print("A farm has been built!")
+                self.farms+=1
+            else:
+                self.state_print("You cannot afford a farm - it costs 1000 "+get_currency()+", but you only have "+beautify_number(self.money)+"!")
+        elif building=="bank":
+            if self.money>=1000:
+                self.money -= 1000
+                self.state_print("A bank has been constructed!")
+                self.banks+=1
+            else:
+                self.state_print("You cannot afford a bank - it costs 1000 "+get_currency()+", but you only have "+beautify_number(self.money)+"!")
+        elif building=="firm":
+            if self.money>=10000:
+                self.money -= 10000
+                self.state_print("A building firm has been constructed!")
+                self.firms += 1
+            else:
+                self.state_print("You cannot afford a building firm - it costs 10,000 "+get_currency()+", but you only have "+beautify_number(self.money)+"!")
+        elif building=="business":
+            if self.money>=1000000:
+                self.money -= 1000000
+                self.state_print("A business has been founded!")
+                self.businesses += 1
+            else:
+                self.state_print("You cannot afford a business - it costs 1,000,000 "+get_currency()+", but you only have "+beautify_number(self.money)+"!")
+        else:
+            self.state_print("A "+building+"? Never heard of it, "+self.leadership_title+".")
+            
+    def take_turn(self):
+        commands = []
+        buildables = []
+        researchables = []
+        command = ""
+        if self.money>=1000:
+            buildables+=["farm","bank"]
+        if self.money>=10000:
+            buildables.append("firm")
+        if self.money>=1000000:
+            buildables.append("business")
+        if self.money>=get_food_research_cost():
+            researchables.append("food")
+        if self.money>=get_money_research_cost():
+            researchables.append("money")
+        if len(buildables)>0 or self.state==0:
+            commands.append("build")
+        if len(researchables)>0 or self.state==0:
+            commands.append("research")
+        if self.state==0:
+            pass
+        else:
+            if self.money>=1000000:
+                command = "build firm"
+            elif self.money>=10000:
+                command = "build business"
+            else:
+                command = random.choice(commands)

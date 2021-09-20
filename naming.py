@@ -120,5 +120,27 @@ def generate_official_name(name,demonym):
         else:
             return "The "+government+" of "+name
 
-
-
+def beautify_number(amount):
+    #Adds commas in between long numbers if necessary, to make them more readable.
+    pretty_number = str(amount)
+    result = ""
+    if len(pretty_number)>3:
+        shortened = int(pretty_number)
+        parts = []
+        while len(str(shortened))>3:
+            integer_part = str(float(shortened)/1000).split(".")[0]
+            float_part = str(float(shortened)/1000).split(".")[1]
+            while len(float_part)<3:
+                float_part+="0"
+            print(integer_part)
+            print(float_part)
+            parts.append(float_part)
+            shortened = int(integer_part)
+            print(len(str(shortened)))
+        result += str(shortened)
+        parts = parts[::-1]
+        for i in parts:
+            result+=","+i
+        return result
+    else:
+        return pretty_number
