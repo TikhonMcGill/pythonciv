@@ -1,6 +1,13 @@
 from naming import *
 import math
 
+command_explanation_dictionary = {
+    "build" : "Construct a building",
+    "research" : "Research a field, gaining certain bonuses",
+    "help" : "You're using this command now!",
+    "info" : "Show information about the nation"
+}
+
 class State:
     def __init__(self):
         self.controller = 1 #The "controller" of the nation - 0 = player, 1 = AI, 2 = The Nation is "Dead" and ready to be deleted from the Game on the next turn
@@ -8,8 +15,8 @@ class State:
         self.manpower = 0 #The "manpower" of the nation - the military-capable population, because you can't have a civilization game without war!
         self.food = 1000 #The amount of food the nation has stored
         self.money = 10000 #The amount of money the nation has
-        self.farms = 0 #The amount of farms the nation has - each produces 10 food per turn
-        self.banks = 0 #The amount of banks the nation has - each one produces 100 money per turn
+        self.farms = 1 #The amount of farms the nation has - each produces 10 food per turn
+        self.banks = 1 #The amount of banks the nation has - each one produces 100 money per turn
         self.firms = 0 #The amount of building firms the nation has - each one produces either a farm or bank per turn
         self.businesses = 0 #The amount of businesses the nation has - each one produces a firm per turn
         self.food_research = 0 #The level of food research - each level provides 1% to food output per turn
@@ -20,9 +27,10 @@ class State:
         self.official_name = ""
         self.leadership_title = ""
         self.currency = ""
+        self.turn_finished = False
 
     def game_over(self):
-        print("IT IS THE END OF "+self.official_name.upper()+"! THE "+self.leadership_title.upper() + " HAS "+random.choice(["PERISHED","ESCAPED","GONE INTO EXILE","BEEN MURDERED","BEEN OVERTHROWN"])+"!")
+        print("IT IS GAME OVER FOR "+self.official_name.upper()+"! THE "+self.leadership_title.upper() + " HAS "+random.choice(["PERISHED","ESCAPED","GONE INTO EXILE","BEEN MURDERED","BEEN OVERTHROWN"])+"!")
         
     def add_namings(self,name,demonym,official_name,leadership_title,currency):
         self.name = name
@@ -69,8 +77,9 @@ class State:
         if self.population<=0:
             self.game_over()
         else:
-            population_growth = math.ceiltoint(self.population * 1.01)
-            manpower_growth = math.floortoint(math.sqrt(population_growth))
+            self.turn_finished = False
+            population_growth = math.ceil(self.population * 1.01) - self.population + 1
+            manpower_growth = math.floor(math.sqrt(population_growth))
             population_growth -= manpower_growth
 
             if self.food<=0:
@@ -81,63 +90,91 @@ class State:
             self.population += population_growth
             self.manpower += manpower_growth
 
-            self.food+=int(self.farms * 10 * (1+ 0.01 * food_research))
-            self.money+=int(self.banks * 100 * (1 + 0.01*money_research))
-            self.farms += mathf.ceiltoint(self.firms/2)
-            self.banks += mathf.floortoint(self.firms/2)
+            self.food+=int(self.farms * 10 * (1+ 0.01 * self.food_research))
+            self.money+=int(self.banks * 100 * (1 + 0.01 * self.money_research))
+            self.farms += math.ceil(self.firms/2)
+            self.banks += math.floor(self.firms/2)
             self.firms += self.businesses
 
-    def get_food_research_cost():
+            self.food -= self.population
+            self.food -= (self.manpower * 3)
+
+    def get_food_research_cost(self):
         cost = 1.5 ** self.food_research
         cost = cost * 100
         cost = int(cost)
         return cost
 
-    def get_money_research_cost():
+    def get_money_research_cost(self):
         cost = 1.75 ** self.money_research
         cost = cost * 100
         cost = int(cost)
         return cost
 
     def state_print(self,text):
-        if self.state==0:
+        if self.controller==0:
             print(text)
 
     def get_currency(self):
         return self.demonym+" "+pluralize(self.currency)
 
-    def build_building(building):
+    def build_building(self,building):
         building = building.lower()
         if building=="farm":
             if self.money>=1000:
                 self.money -= 1000
                 self.state_print("A farm has been built!")
                 self.farms+=1
+                self.turn_finished = True
             else:
-                self.state_print("You cannot afford a farm - it costs 1000 "+get_currency()+", but you only have "+beautify_number(self.money)+"!")
+                self.state_print("You cannot afford a farm - it costs 1000 "+self.get_currency()+", but you only have "+beautify_number(self.money)+"!")
         elif building=="bank":
             if self.money>=1000:
                 self.money -= 1000
                 self.state_print("A bank has been constructed!")
                 self.banks+=1
+                self.turn_finished = True
             else:
-                self.state_print("You cannot afford a bank - it costs 1000 "+get_currency()+", but you only have "+beautify_number(self.money)+"!")
+                self.state_print("You cannot afford a bank - it costs 1000 "+self.get_currency()+", but you only have "+beautify_number(self.money)+"!")
         elif building=="firm":
             if self.money>=10000:
                 self.money -= 10000
                 self.state_print("A building firm has been constructed!")
                 self.firms += 1
+                self.turn_finished = True
             else:
-                self.state_print("You cannot afford a building firm - it costs 10,000 "+get_currency()+", but you only have "+beautify_number(self.money)+"!")
+                self.state_print("You cannot afford a building firm - it costs 10,000 "+self.get_currency()+", but you only have "+beautify_number(self.money)+"!")
         elif building=="business":
             if self.money>=1000000:
                 self.money -= 1000000
                 self.state_print("A business has been founded!")
                 self.businesses += 1
+                self.turn_finished = True
             else:
-                self.state_print("You cannot afford a business - it costs 1,000,000 "+get_currency()+", but you only have "+beautify_number(self.money)+"!")
+                self.state_print("You cannot afford a business - it costs 1,000,000 "+self.get_currency()+", but you only have "+beautify_number(self.money)+"!")
         else:
             self.state_print("A "+building+"? Never heard of it, "+self.leadership_title+".")
+
+    def do_research(self,typ):
+        typ=typ.lower()
+        if typ=="food":
+            cost = self.get_food_research_cost()
+            if self.money>=cost:
+                self.money-=cost
+                self.food_research+=1
+                self.turn_finished = True
+            else:
+                self.state_print("You cannot afford to research food - it costs "+beautify_number(self.get_food_research_cost())+" "+self.get_currency()+", but you only have "+beautify_number(self.money)+"!")
+        elif typ=="money":
+            cost = self.get_money_research_cost()
+            if self.money>=cost:
+                self.money-=cost
+                self.money_research+=1
+                self.turn_finished = True
+            else:
+                self.state_print("You cannot afford to research money - it costs "+beautify_number(self.get_money_research_cost())+" "+self.get_currency()+", but you only have "+beautify_number(self.money)+"!")
+        else:
+            self.state_print(typ.capitalize()+"? I've never heard of that scientific field, "+self.leadership_title+".")
             
     def take_turn(self):
         commands = []
@@ -150,21 +187,85 @@ class State:
             buildables.append("firm")
         if self.money>=1000000:
             buildables.append("business")
-        if self.money>=get_food_research_cost():
+        if self.money>=self.get_food_research_cost():
             researchables.append("food")
-        if self.money>=get_money_research_cost():
+        if self.money>=self.get_money_research_cost():
             researchables.append("money")
-        if len(buildables)>0 or self.state==0:
+        if len(buildables)>0:
             commands.append("build")
-        if len(researchables)>0 or self.state==0:
+        if len(researchables)>0:
             commands.append("research")
-        if self.state==0:
+        if self.controller==0:
             commands.append("info")
             commands.append("help")
         else:
-            if self.money>=1000000:
-                command = "build business"
-            elif self.money>=10000:
-                command = "build firm"
+            commands.append("")
+        while not self.turn_finished:
+            if self.controller==0:
+                command = input("Enter your command, "+self.leadership_title+"(enter \"help\" for a list of available commands):")
             else:
-                command = random.choice(commands)
+                if self.money>=1000000:
+                    command = "build business"
+                elif self.money>=10000:
+                    command = "build firm"
+                else:
+                    command = random.choice(commands)
+            command = command.replace(" ","")
+            if "build" in command and "build" in commands:
+                command = command.replace("build","")
+                if "farm" in command:
+                    self.build_building("farm")
+                elif "bank" in command:
+                    self.build_building("bank")
+                elif "firm" in command:
+                    self.build_building("firm")
+                elif "business" in command:
+                    self.build_building("business")
+                else:
+                    if self.controller==0:
+                        print("Here are the buildings you can afford to build:")
+                        for i in buildables:
+                            print(i)
+                        building = input("Enter the building you want to build:")
+                        self.build_building(building)
+                    else:
+                        self.build_building(random.choice(buildables))
+            elif "research" in command and "research" in commands:
+                command = command.replace("research","")
+                if "food" in command:
+                    self.do_research("food")
+                elif "money" in command:
+                    self.do_research("money")
+                else:
+                    if self.controller==0:
+                        print("Here are the fields you can afford to research:")
+                        for i in researchables:
+                            print(i)
+                        research = input("Enter the field you want to research:")
+                        self.do_research(research)
+                    else:
+                        self.do_research(random.choice(researchables))
+            elif "help" in command:
+                print("Gladly, "+self.leadership_title+"!")
+                print("\n")
+                for i in commands:
+                    print(i + " - "+command_explanation_dictionary[i])
+            elif "info" in command:
+                print("Here is some information about "+self.official_name+", "+self.leadership_title+":")
+                print("\n")
+                print("We have a population of "+beautify_number(self.population)+" "+pluralize(self.demonym)+". They will consume "+beautify_number(self.population)+" units of food per turn!")
+                print("We also have "+beautify_number(self.manpower)+" combat-ready people, ready to defend "+self.name+"! They will consmue "+beautify_number(self.manpower*3)+" units of food per turn!")
+                print("There are "+beautify_number(self.food)+" units of food stored in our stockpiles.")
+                print("Our treasury holds "+beautify_number(self.money)+" "+self.get_currency()+".")
+                print("\n")
+                print("We have "+beautify_number(self.farms)+" farms. They will provide "+beautify_number(self.farms*10)+" units of food per turn!")
+                print("We have "+beautify_number(self.banks)+" banks. They will provide "+beautify_number(self.banks*100)+" "+self.get_currency()+" per turn!")
+                print("We have "+beautify_number(self.firms)+" building firms. They will build "+beautify_number(math.ceil(self.firms/2))+" farms and "+beautify_number(math.floor(self.firms/2))+" banks per turn!")
+                print("We have "+beautify_number(self.businesses)+" businesses. They will build "+beautify_number(self.businesses)+" building firms per turn!")      
+                print("\n")
+                print("We have "+beautify_number(self.food_research)+" levels of research in the food field. This gives us a "+beautify_number(self.food_research)+"% bonus to all food produced by farms!")
+                print("We have "+beautify_number(self.money_research)+" levels of research in the money field. This gives us a "+beautify_number(self.money_research)+"% bonus to all money generated by banks!")
+            elif command=="":
+                self.turn_finished = True
+            if self.controller==0:
+                print("\n")

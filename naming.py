@@ -132,11 +132,8 @@ def beautify_number(amount):
             float_part = str(float(shortened)/1000).split(".")[1]
             while len(float_part)<3:
                 float_part+="0"
-            print(integer_part)
-            print(float_part)
             parts.append(float_part)
             shortened = int(integer_part)
-            print(len(str(shortened)))
         result += str(shortened)
         parts = parts[::-1]
         for i in parts:
