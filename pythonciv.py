@@ -2,8 +2,6 @@
 
 from state import *
 
-states = []
-
 def iinput(text,default_value):
     try:
         return int(input(text))
@@ -33,20 +31,18 @@ for p in range(player_number):
         if country_currency=="":
             country_currency = perturb(generate_gibberish()).capitalize()
         new_state.add_namings(country_name,country_demonym,country_official_name,country_leadership_title,country_currency)
-    states.append(new_state)
 
 ai_number = iinput("Enter the number of computer-controller nations:",1)
 
 for p in range(ai_number):
     new_state = State()
     new_state.generate_random_name()
-    states.append(new_state)
 
 turn = 1
 
-while len(states)>1:
+while len(State.states)>1:
     print("TURN "+str(turn)+"!")
-    for i in states:
+    for i in State.states:
         i.iterate_values()
         i.take_turn()
     turn+=1
