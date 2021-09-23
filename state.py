@@ -17,7 +17,6 @@ class State:
     states = []
     
     def do_invasion(invader,defender):
-        print("DOING INVASION!")
         invader_power = random.randint(0,invader.manpower)
         defender_power = random.randint(0,defender.manpower)
         defender.state_print(defender.leadership_title+" of "+defender.official_name+", we are being invaded by "+invader.official_name+"!")
@@ -88,8 +87,9 @@ class State:
         self.controller = 2
         for i in self.diplomatic_relations:
             relation_loser = i.get_other_side(self)
-            relation_loser.diplomatic_relations.remove(i)
-            relation_loser.state_print("We no longer have diplomatic relations with "+self.official_name+", as they no longer exist!")
+            if i in relation_loser.diplomatic_relations:
+                relation_loser.diplomatic_relations.remove(i)
+        State.states.remove(self)
 
     def add_namings(self,name,demonym,official_name,leadership_title,currency):
         self.name = name
@@ -260,10 +260,9 @@ class State:
                 commands.append("build")
             if len(researchables)>0:
                 commands.append("research")
-            if self.manpower>0:
+            if self.manpower>100 and (len(State.states)>1):
                 commands.append("war")
-            if len(invadables)>0 and self.manpower>0:
-                print("INVADABLE!")
+            if len(invadables)>0:
                 commands.append("invade")
             if self.controller==0:
                 commands.append("info")

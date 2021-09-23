@@ -18,7 +18,7 @@ for p in range(player_number):
         new_state.generate_random_name()
     else:
         country_name = input("Enter the name of your nation:")
-        country_demonym = input("Enter the demonym of your nation(leave blank to automatically generate one:")
+        country_demonym = input("Enter the demonym of your nation(leave blank to automatically generate one):")
         if country_demonym=="":
             country_demonym = demonymize(country_name)
         country_official_name = input("Enter the official name of your nation(e.g. \"The X-an Empire\" - leave blank to generate a random one):")
@@ -41,8 +41,10 @@ for p in range(ai_number):
 turn = 1
 
 while len(State.states)>1:
-    print("TURN "+str(turn)+"!")
+    print("THERE ARE "+str(len(State.states))+" NATIONS REMAINING!")
     for i in State.states:
         i.iterate_values()
         i.take_turn()
     turn+=1
+
+input(State.states[0].official_name+" is Eternally Victorious! Glory to the "+State.states[0].leadership_title+" of "+State.states[0].name+"!")
