@@ -122,6 +122,29 @@ def generate_official_name(name,demonym):
         else:
             return "The "+government+" of "+name
 
+def generate_fully_random_state(name,demonym):
+    #Generates a fully random official name, i.e. generates even the leadership title randomly
+    name_order = random.randint(1,2)
+    generate_adjective = random.choice([True,False,False])
+    plural_government = random.choice([True,False,False,False])
+
+    leadership_title = generate_gibberish().capitalize()
+    government = combine_fluently(leadership_title,random.choice(["dom","y","ate","ship"]))
+
+    if plural_government==True:
+        government = pluralize(government)
+
+    if name_order==1:
+        if generate_adjective==True:
+            return "The "+demonym+" "+random.choice(government_adjectives)+" "+government
+        else:
+            return "The "+demonym+" "+government
+    else:
+        if generate_adjective==True:
+            return "The "+random.choice(government_adjectives)+" "+government+" of "+name
+        else:
+            return "The "+government+" of "+name
+
 def beautify_number(amount):
     #Adds commas in between long numbers if necessary, to make them more readable.
     pretty_number = str(amount)
