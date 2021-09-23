@@ -8,7 +8,8 @@ command_explanation_dictionary = {
     "help" : "You're using this command now!",
     "info" : "Show information about the nation",
     "war" : "Declare war on a foreign nation",
-    "invade" : "Invade a nation you're at war with"
+    "invade" : "Invade a nation you're at war with",
+    "rename" : "Rename aspects of your nation"
 }
 
 class State:
@@ -267,6 +268,7 @@ class State:
             if self.controller==0:
                 commands.append("info")
                 commands.append("help")
+                commands.append("rename")
             else:
                 commands.append("")
             while not self.turn_finished:
@@ -368,6 +370,22 @@ class State:
                         r = Relation(self,victim)
                         r.name = "war"
                         self.turn_finished = True
+                elif "rename" in command:
+                    def yes_no(text):
+                        answer = input(text)
+                        if "ye" in answer:
+                            return True
+                        return False
+                    if yes_no("Change the name of your nation?")==True:
+                        self.name = input("Enter the new name of your nation:")
+                    if yes_no("Change the demonym of your nation?")==True:
+                        self.demonym = input("Enter the new demonym of your nation:")
+                    if yes_no("Change the official name of your nation?")==True:
+                        self.official_name = input("Enter your nation's new official name:")
+                    if yes_no("Change the leadership title of your nation?")==True:
+                        self.leadership_title = input("Enter your nation's new leadership title:")
+                    if yes_no("Change the currency name of your nation?")==True:
+                        self.currency = input("Enter your nation's new currency name:")
                 elif command=="":
                     self.turn_finished = True
                 if self.controller==0:
