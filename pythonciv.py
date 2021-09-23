@@ -32,7 +32,7 @@ for p in range(player_number):
             country_currency = perturb(generate_gibberish()).capitalize()
         new_state.add_namings(country_name,country_demonym,country_official_name,country_leadership_title,country_currency)
 
-ai_number = iinput("Enter the number of computer-controller nations:",1)
+ai_number = iinput("Enter the number of computer-controlled nations:",1)
 
 for p in range(ai_number):
     new_state = State()

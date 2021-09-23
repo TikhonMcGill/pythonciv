@@ -16,6 +16,7 @@ class State:
     states = []
     
     def do_invasion(invader,defender):
+        print("DOING INVASION!")
         invader_power = random.randint(0,invader.manpower)
         defender_power = random.randint(0,defender.manpower)
         defender.state_print(defender.leadership_title+" of "+defender.official_name+", we are being invaded by "+invader.official_name+"!")
@@ -35,7 +36,7 @@ class State:
         
         if invader_power>defender_power:
             invader.state_print(invader.leadership_title+", we are victorious! Hail "+invader.official_name+"!")
-            annex(invader,victim)
+            State.annex(invader,defender)
         else:
             invader.state_print(invader.leadership_title+", our invasion was repelled!")
         
@@ -51,6 +52,12 @@ class State:
         perpetrator.money_research = max(perpetrator.money_research,victim.money_research)
         print(victim.official_name+" was annexed by "+perpetrator.official_name+"!")
         victim.game_over()
+
+    def has_relation(self,other,name):
+        for i in self.diplomatic_relations:
+            if ((i.receiver==self and i.giver==other) or (i.giver==self and i.receiver==other)) and i.name==name:
+                return True
+        return False
     
     def __init__(self):
         self.controller = 1 #The "controller" of the nation - 0 = player, 1 = AI, 2 = The Nation is "Dead" and ready to be deleted from the Game on the next turn
@@ -77,7 +84,11 @@ class State:
 
     def game_over(self):
         print("IT IS GAME OVER FOR "+self.official_name.upper()+"! THE "+self.leadership_title.upper() + " HAS "+random.choice(["PERISHED","ESCAPED","GONE INTO EXILE","BEEN MURDERED","BEEN OVERTHROWN"])+"!")
-        self.controller = 2    
+        self.controller = 2
+        for i in self.diplomatic_relations:
+            relation_loser = i.get_other_side(self)
+            relation_loser.diplomatic_relations.remove(i)
+            relation_loser.state_print("We no longer have diplomatic relations with "+self.official_name+", as they no longer exist!")
 
     def add_namings(self,name,demonym,official_name,leadership_title,currency):
         self.name = name
@@ -126,14 +137,14 @@ class State:
                 self.game_over()
             else:
                 self.turn_finished = False
-                population_growth = math.ceil(self.population * 1.01) - self.population + 1
-                manpower_growth = math.floor(math.sqrt(population_growth))
-                population_growth -= manpower_growth
-
                 if self.food<=0:
                     self.food = 0
-                    population_growth = 0
+                    population_growth = math.ceil(self.population * 0.95) - self.population
                     manpower_growth = 0
+                else:
+                    population_growth = math.ceil(self.population * 1.01) - self.population + 1
+                    manpower_growth = math.floor(math.sqrt(population_growth))
+                    population_growth -= manpower_growth
 
                 self.population += population_growth
                 self.manpower += manpower_growth
@@ -229,7 +240,7 @@ class State:
             commands = []
             buildables = []
             researchables = []
-            invadables = []
+            invadables = {}
             command = ""
             if self.money>=1000:
                 buildables+=["farm","bank"]
@@ -243,7 +254,7 @@ class State:
                 researchables.append("money")
             for i in self.diplomatic_relations:
                 if i.name=="war":
-                    invadables.append(i.get_other_side(self).official_name)
+                    invadables[i.get_other_side(self).official_name] = i.get_other_side(self)
             if len(buildables)>0:
                 commands.append("build")
             if len(researchables)>0:
@@ -251,6 +262,7 @@ class State:
             if self.manpower>0:
                 commands.append("war")
             if len(invadables)>0 and self.manpower>0:
+                print("INVADABLE!")
                 commands.append("invade")
             if self.controller==0:
                 commands.append("info")
@@ -311,7 +323,7 @@ class State:
                     print("Here is some information about "+self.official_name+", "+self.leadership_title+":")
                     print("\n")
                     print("We have a population of "+beautify_number(self.population)+" "+pluralize(self.demonym)+". They will consume "+beautify_number(self.population)+" units of food per turn!")
-                    print("We also have "+beautify_number(self.manpower)+" combat-ready people, ready to defend "+self.name+"! They will consmue "+beautify_number(self.manpower*3)+" units of food per turn!")
+                    print("We also have "+beautify_number(self.manpower)+" combat-ready people, ready to defend "+self.name+"! They will consume "+beautify_number(self.manpower*3)+" units of food per turn!")
                     print("There are "+beautify_number(self.food)+" units of food stored in our stockpiles.")
                     print("Our treasury holds "+beautify_number(self.money)+" "+self.get_currency()+".")
                     print("\n")
@@ -322,27 +334,26 @@ class State:
                     print("\n")
                     print("We have "+beautify_number(self.food_research)+" levels of research in the food field. This gives us a "+beautify_number(self.food_research)+"% bonus to all food produced by farms!")
                     print("We have "+beautify_number(self.money_research)+" levels of research in the money field. This gives us a "+beautify_number(self.money_research)+"% bonus to all money generated by banks!")
-                elif "invade" in command:
+                elif "invade" in command and "invade" in commands:
                     if self.controller==0:
                         print("Here are the nations we can invade:")
-                        for i in invadables:
+                        for i in list(invadables.keys()):
                             print(i)
                         invasion = input("Enter the name of the nation you want to invade, "+self.leadership_title+":")
                     else:
-                        invasion = random.choice(invadables)
-                    if invasion in invadables:
-                        for i in self.diplomatic_relations:
-                            if i.receiver.name==invasion:
-                                do_invasion(self,i.get_other_side(self))
-                                self.turn_finished = True
+                        invasion = random.choice(list(invadables.keys()))
+                    if invasion in list(invadables.keys()):
+                        State.do_invasion(self,invadables[invasion])
+                        self.turn_finished = True
                     else:
                         self.state_print(invasion+"? That must be a fictional nation, "+self.leadership_title+".")
-                elif "war" in command:
+                elif "war" in command and "war" in commands:
                     victim = ""
                     if self.controller==0:
                         country_dictionary = {}
                         for i in State.states:
-                            country_dictionary[i.official_name] = i
+                            if self.has_relation(i,"war")==False and i!=self:
+                                country_dictionary[i.official_name] = i
                         for i in list(country_dictionary.keys()):
                             print(i)
                         choice = input("Enter the nation you wish to invade, "+self.leadership_title+":")
@@ -350,7 +361,7 @@ class State:
                             victim = country_dictionary[choice]
                     else:
                         victim = random.choice(State.states)
-                        while victim==self:
+                        while victim==self or self.has_relation(victim,"war"):
                             victim = random.choice(State.states)
                     if victim!="":
                         victim.state_print(victim.leadership_title+" of "+victim.official_name+"! "+self.official_name+" declared war on us!")
