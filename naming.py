@@ -50,13 +50,15 @@ def countrify(word):
 def demonymize(word):
     #Simply removes the last letter of the word if a vowel, and then adds a suffix that makes it a demonym. 
     result = word
-    if word[-2:]=="ia":
+    if word[-2:]=="ia" or word[-2:]=="um":
         result = word[:-2]
     elif word[-1] in vowels:
         result = word[:-1]
+    elif word[-3:]=="ium":
+        result = word[:-3]
     if word[-4:]=="stan":
         return random.choice([word+"i",word[:-5]+"i"])
-    result+=random.choice(["ian","an","ite","er","ish","ic","ine"])
+    result = combine_fluently(result,random.choice(["ian","an","ite","er","ish","ic","ine"]))
     return result
 
 def generate_title():
