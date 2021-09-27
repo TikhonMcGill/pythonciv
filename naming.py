@@ -10,6 +10,8 @@ government_adjectives = ["Union","Combined","Serene","Great","Grand","Everlastin
 leadership_titles = ["Master","Ruler","Khan","President","King","Emperor","Administrator","Consul","Executive","Secretary","Chieftain","Duke","Imperator","Minister","Manager","Monarch","Leader","Commander","Father"]
 leadership_modifiers = ["Grand *","Serene *","*-in-Chief","Vice-*","Arch-*","Chief *","Immortal *","Eternal *","Great *","People's *","General *","Executive *","* Regnant","Perpetual *","Holy *","Revered *","Prime *","First *"]
 
+city_suffices = ["burgh","ville","ton","castle","ford","bury","stead"," City","ia","ium"]
+
 def generate_gibberish():
     #Generates a gibberish word by alternating between a vowel and consonant
     is_vowel = random.choice([True,False])
@@ -42,6 +44,9 @@ def combine_fluently(part1,part2):
         result = part1+part2
     result = result.replace("ii","i")
     return result
+
+def generate_city_name():
+    return combine_fluently(generate_gibberish().capitalize(),random.choice(city_suffices))
     
 def countrify(word):
     #Turns a gibberish word into something resembling the name of a country, e.g. Uhalo --> Uhaloland
