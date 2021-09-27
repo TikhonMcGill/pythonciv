@@ -9,7 +9,8 @@ command_explanation_dictionary = {
     "info" : "Show information about the nation",
     "war" : "Declare war on a foreign nation",
     "invade" : "Invade a nation you're at war with",
-    "rename" : "Rename aspects of your nation"
+    "rename" : "Rename aspects of your nation",
+    "demobilize" : "Turn your combat-ready people into regular civilians"
 }
 
 class State:
@@ -264,6 +265,8 @@ class State:
                 commands.append("war")
             if len(invadables)>0:
                 commands.append("invade")
+            if self.manpower>0:
+                commands.append("demobilize")
             if self.controller==0:
                 commands.append("info")
                 commands.append("help")
@@ -274,9 +277,9 @@ class State:
                 if self.controller==0:
                     command = input("Enter your command, "+self.leadership_title+"(enter \"help\" for a list of available commands):")
                 else:
-                    if self.money>=1000000:
+                    if self.money>=1000000 and random.randint(1,2)==1:
                         command = "build business"
-                    elif self.money>=10000:
+                    elif self.money>=10000 and random.randint(1,2)==1:
                         command = "build firm"
                     else:
                         command = random.choice(commands)
@@ -385,6 +388,10 @@ class State:
                         self.leadership_title = input("Enter your nation's new leadership title:")
                     if yes_no("Change the currency name of your nation?")==True:
                         self.currency = input("Enter your nation's new currency name:")
+                elif "demobilize" in command and "demobilize" in commands:
+                    self.state_print(str(self.manpower)+" "+self.demonym+" soldiers have been demobilized into the citizen population!")
+                    self.population+=self.manpower
+                    self.manpower = 0
                 elif command=="":
                     self.turn_finished = True
                 if self.controller==0:
