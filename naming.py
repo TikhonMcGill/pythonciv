@@ -10,7 +10,9 @@ government_adjectives = ["Union","Combined","Serene","Great","Grand","Everlastin
 leadership_titles = ["Master","Ruler","Khan","President","King","Emperor","Administrator","Consul","Executive","Secretary","Chieftain","Duke","Imperator","Minister","Manager","Monarch","Leader","Commander","Father"]
 leadership_modifiers = ["Grand *","Serene *","*-in-Chief","Vice-*","Arch-*","Chief *","Immortal *","Eternal *","Great *","People's *","General *","Executive *","* Regnant","Perpetual *","Holy *","Revered *","Prime *","First *"]
 
-city_suffices = ["burgh","ville","ton","castle","ford","bury","stead"," City","ia","ium"]
+city_suffices = ["burgh","ville","ton","castle","ford","bury","stead","ia","ium","haven","port","folk","stadt","burg","hampton"]
+
+dynasty_additions = ["von *burg","*ville","de *","of *","*us","*ovich","*id","*son","*ov","von *"]
 
 def generate_gibberish():
     #Generates a gibberish word by alternating between a vowel and consonant
@@ -47,6 +49,13 @@ def combine_fluently(part1,part2):
 
 def generate_city_name():
     return combine_fluently(generate_gibberish().capitalize(),random.choice(city_suffices))
+
+def generate_dynasty_name():
+    typ = random.randint(1,2)
+    if typ==1:
+        return random.choice(dynasty_additions).replace("*",generate_gibberish().capitalize())
+    else:
+        return random.choice(dynasty_additions).replace("*",generate_city_name())
     
 def countrify(word):
     #Turns a gibberish word into something resembling the name of a country, e.g. Uhalo --> Uhaloland
