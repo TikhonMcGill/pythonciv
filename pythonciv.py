@@ -16,6 +16,8 @@ for p in range(player_number):
     randomize = input("Do you want to randomize your nation's name?")
     if "ye" in randomize.lower():
         new_state.generate_random_name()
+        new_state.print_namings()
+        input()
     else:
         country_name = input("Enter the name of your nation:")
         country_demonym = input("Enter the demonym of your nation(leave blank to automatically generate one):")
@@ -31,6 +33,8 @@ for p in range(player_number):
         if country_currency=="":
             country_currency = perturb(generate_gibberish()).capitalize()
         new_state.add_namings(country_name,country_demonym,country_official_name,country_leadership_title,country_currency)
+        new_state.print_namings()
+        input()
 
 ai_number = iinput("Enter the number of computer-controlled nations:",1)
 
@@ -41,6 +45,7 @@ for p in range(ai_number):
 turn = 1
 
 while len(State.states)>1:
+    print("\n"*10)
     print("THERE ARE "+str(len(State.states))+" NATIONS REMAINING!")
     for i in State.states:
         i.iterate_values()
