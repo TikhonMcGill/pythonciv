@@ -43,6 +43,7 @@ class State:
         
     def annex(perpetrator,victim):
         perpetrator.population+=victim.population
+        perpetrator.scientists+=random.randint(0,victim.scientists)
         perpetrator.food+=victim.food
         perpetrator.money+=victim.money
         perpetrator.farms+=victim.farms
@@ -51,7 +52,7 @@ class State:
         perpetrator.businesses+=victim.businesses
         perpetrator.food_research = max(perpetrator.food_research,victim.food_research)
         perpetrator.money_research = max(perpetrator.money_research,victim.money_research)
-        print(victim.official_name+" was annexed by "+perpetrator.official_name+"!")
+        print(perpetrator.official_name+" has invaded and annexed "+victim.official_name+"!")
         victim.game_over()
 
     def has_relation(self,other,name):
@@ -64,6 +65,7 @@ class State:
         self.controller = 1 #The "controller" of the nation - 0 = player, 1 = AI, 2 = The Nation is "Dead" and ready to be deleted from the Game on the next turn
         self.population = 100 #The population of the nation
         self.manpower = 0 #The "manpower" of the nation - the military-capable population, because you can't have a civilization game without war!
+        self.scientists = 0 #The "scientist" population of the nation - each scientist provides 1 unit of food or money research randomly - note, they appear VERY late in game!
         self.food = 1000 #The amount of food the nation has stored
         self.money = 10000 #The amount of money the nation has
         self.farms = 1 #The amount of farms the nation has - each produces 10 food per turn
@@ -139,35 +141,49 @@ class State:
                 self.game_over()
             else:
                 self.turn_finished = False
+
+                self.food -= self.population
+                self.food -= (self.manpower * 3)
+                self.food -= (self.scientists * 4)
+                
                 if self.food<=0:
                     self.food = 0
-                    population_growth = math.ceil(self.population * 0.95) - self.population
-                    manpower_growth = 0
+                    population_growth = math.ceil(self.population * 0.9) - self.population
+                    manpower_growth = -50
+                    scientist_growth = -10
                 else:
                     population_growth = math.ceil(self.population * 1.01) - self.population + 1
-                    manpower_growth = math.floor(math.sqrt(population_growth))
+                    manpower_growth = math.floor(math.sqrt(population_growth)/10) - 1
+                    scientist_growth = math.floor(int(population_growth ** (1/5))/100) - 1
                     population_growth -= manpower_growth
 
                 self.population += population_growth
                 self.manpower += manpower_growth
+                self.scientists += scientist_growth
+
+                if self.manpower<0:
+                    self.manpower = 0
+                if self.scientists<0:
+                    self.scientists = 0
 
                 self.food+=int(self.farms * 10 * (1+ 0.01 * self.food_research))
                 self.money+=int(self.banks * 100 * (1 + 0.01 * self.money_research))
+                
                 self.farms += math.ceil(self.firms/2)
                 self.banks += math.floor(self.firms/2)
                 self.firms += self.businesses
 
-                self.food -= self.population
-                self.food -= (self.manpower * 3)
+                self.food_research += math.ceil(self.scientists/2)
+                self.money_research += math.floor(self.scientists/2)
 
     def get_food_research_cost(self):
-        cost = 1.5 ** self.food_research
+        cost = 2 ** self.food_research
         cost = cost * 100
         cost = int(cost)
         return cost
 
     def get_money_research_cost(self):
-        cost = 1.75 ** self.money_research
+        cost = 3 ** self.money_research
         cost = cost * 100
         cost = int(cost)
         return cost
@@ -327,14 +343,20 @@ class State:
                     print("Here is some information about "+self.official_name+", "+self.leadership_title+":")
                     print("\n")
                     print("We have a population of "+beautify_number(self.population)+" "+pluralize(self.demonym)+". They will consume "+beautify_number(self.population)+" units of food per turn!")
-                    print("We also have "+beautify_number(self.manpower)+" combat-ready people, ready to defend "+self.name+"! They will consume "+beautify_number(self.manpower*3)+" units of food per turn!")
+                    if self.manpower>0:
+                        print("We also have "+beautify_number(self.manpower)+" combat-ready people, ready to defend "+self.name+"! They will consume "+beautify_number(self.manpower*3)+" units of food per turn!")
+                    if self.scientists>0:
+                        print("There are "+beautify_number(self.scientists)+" scientifically-astute people in "+self.name+". Per turn, they will produce "+beautify_number(math.ceil(self.scientists/2))+" levels of food research per turn, and "+beautify_number(math.floor(self.scientists/2))+" levels of money research per turn.")
+                        print("They will, however, consume "+beautify_number(self.scientists*4)+" units of food per turn!")
                     print("There are "+beautify_number(self.food)+" units of food stored in our stockpiles.")
                     print("Our treasury holds "+beautify_number(self.money)+" "+self.get_currency()+".")
                     print("\n")
                     print("We have "+beautify_number(self.farms)+" farms. They will provide "+beautify_number(self.farms*10)+" units of food per turn!")
                     print("We have "+beautify_number(self.banks)+" banks. They will provide "+beautify_number(self.banks*100)+" "+self.get_currency()+" per turn!")
-                    print("We have "+beautify_number(self.firms)+" building firms. They will build "+beautify_number(math.ceil(self.firms/2))+" farms and "+beautify_number(math.floor(self.firms/2))+" banks per turn!")
-                    print("We have "+beautify_number(self.businesses)+" businesses. They will build "+beautify_number(self.businesses)+" building firms per turn!")      
+                    if self.firms>0:
+                        print("We have "+beautify_number(self.firms)+" building firms. They will build "+beautify_number(math.ceil(self.firms/2))+" farms and "+beautify_number(math.floor(self.firms/2))+" banks per turn!")
+                    if self.businesses>0:
+                        print("We have "+beautify_number(self.businesses)+" businesses. They will build "+beautify_number(self.businesses)+" building firms per turn!")      
                     print("\n")
                     print("We have "+beautify_number(self.food_research)+" levels of research in the food field. This gives us a "+beautify_number(self.food_research)+"% bonus to all food produced by farms!")
                     print("We have "+beautify_number(self.money_research)+" levels of research in the money field. This gives us a "+beautify_number(self.money_research)+"% bonus to all money generated by banks!")
