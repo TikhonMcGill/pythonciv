@@ -36,15 +36,16 @@ def combine_fluently(part1,part2):
             result = part1[:-2]+part2
         else:
             result = part1[:-1]+part2
-    elif part1[-1] in vowels and part2[0] in vowels:
-        result = part1[:-2]+part2
+    elif part1[-1] in vowels and part2[0] in vowels and part1[-1]!="i":
+        result = part1[:-1]+part2
     else:
         result = part1+part2
+    result = result.replace("ii","i")
     return result
     
 def countrify(word):
-    #Turns a gibberish word into something resembling the name of a country, e.g. Uhalo --> Uhaloburgh
-    result = combine_fluently(word,random.choice(["land","burgh","ia","ium","stan"]))
+    #Turns a gibberish word into something resembling the name of a country, e.g. Uhalo --> Uhaloland
+    result = combine_fluently(word,random.choice(["land","ia","ium","stan"]))
     return result
 
 def demonymize(word):
@@ -58,7 +59,7 @@ def demonymize(word):
         result = word[:-3]
     if word[-4:]=="stan":
         return random.choice([word+"i",word[:-5]+"i"])
-    result = combine_fluently(result,random.choice(["ian","an","ite","er","ish","ic","ine"]))
+    result = combine_fluently(result,random.choice(["an","ite","er","ish","ic","ine"]))
     return result
 
 def generate_title():
