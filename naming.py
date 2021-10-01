@@ -7,8 +7,8 @@ doublable = ["e","c","l","p","o","s","r","z"]
 government_titles = ["Nation","Clan","Horde","Republic","Kingdom","Empire","State","Federation","Confederation","Union","Tribe","Duchy","Imperium","Senate","Congress","Diarchy","Monarchy","Tetrarchy","Confederacy","House","Dynasty"]
 government_adjectives = ["Union","Combined","Serene","Great","Grand","Everlasting","Eternal","United","Unified","Federated","Confederal","People's","National","Nationalist","Socialist","Communist","Holy","Plurinational"]
 
-leadership_titles = ["Master","Ruler","Khan","President","King","Emperor","Administrator","Consul","Executive","Secretary","Chieftain","Duke","Imperator","Minister","Manager","Monarch","Leader","Commander","Father"]
-leadership_modifiers = ["Grand *","Serene *","*-in-Chief","Vice-*","Arch-*","Chief *","Immortal *","Eternal *","Great *","People's *","General *","Executive *","* Regnant","Perpetual *","Holy *","Revered *","Prime *","First *"]
+leadership_titles = ["Regent","Lord","Master","Ruler","Khan","President","King","Emperor","Administrator","Consul","Executive","Secretary","Chieftain","Duke","Imperator","Minister","Manager","Monarch","Leader","Commander","Father"]
+leadership_modifiers = ["Over-*","Grand *","Serene *","*-in-Chief","Vice-*","Arch-*","Chief *","Immortal *","Eternal *","Great *","People's *","General *","Executive *","* Regnant","Perpetual *","Holy *","Revered *","Prime *","First *"]
 
 city_suffices = ["burgh","ville","ton","castle","ford","bury","stead","ia","ium","haven","port","folk","stadt","burg","hampton"]
 
@@ -77,11 +77,13 @@ def demonymize(word):
     return result
 
 def generate_title():
-    way = random.randint(1,2) #If it's 1, it'll JUST get a title, if it's 2, it will "fancy it up"
+    way = random.randint(1,3) #If it's 1, it'll JUST get a title, if it's 2, it will "fancy it up"
     if way==1:
         return random.choice(leadership_titles)
     if way==2:
         return random.choice(leadership_modifiers).replace("*",random.choice(leadership_titles))
+    if way==3:
+        return random.choice(leadership_titles)+"-"+random.choice(leadership_titles)
 
 def pluralize(word):
     #Make the word stated plural in a way that makes sense
